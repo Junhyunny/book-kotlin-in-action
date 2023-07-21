@@ -292,5 +292,218 @@ fun evalAsKotlinWithWhen(expression: Expression): Int =
     }
 ```
 
-### 2.3.7. if와 when의 분기에서 블록 사용
+#### 2.3.7. if와 when의 분기에서 블록 사용
 
+* if나 when 모두 분기에 블록을 사용할 수 있다.
+* 블록의 마지막 문장이 블록 전체의 결과가 된다. 
+    * 블록 맨 마지막에 그 분기의 결과 값을 위치시킨다.
+
+```kotlin
+fun evalWithLogging(expression: Expression): Int =
+    when (expression) {
+        is Num -> {
+            println("num: ${expression.value}")
+            expression.value
+        }
+
+        is Sum -> {
+            val leftValue = evalWithLogging(expression.left)
+            val rightValue = evalWithLogging(expression.right)
+            println("sum: ${leftValue} + ${rightValue}")
+            leftValue + rightValue
+        }
+
+        else -> throw IllegalArgumentException("unknown expression")
+    }
+```
+
+### 2.4. 대상을 이터레이션
+
+* while 루프는 동일하다.
+* for 루프는 for-each 루프만 지원한다.
+
+#### 2.4.1. while 루프
+
+* while, do-while 루프가 존재한다.
+* 두 루프의 문법은 자바와 동일하다.
+
+#### 2.4.2. 수에 대한 이터레이션
+
+* 코틀린은 범위(range)를 사용한다.
+* 범위는 기본적으로 두 값으로 이뤄진 구간이다.
+* 코틀린의 범위는 폐구간으로 양 끝을 포함한다.
+* 아래 예시 코드는 1에서 10까지 포함한다.
+
+```kotlin
+val oneToTen = 1..10
+```
+
+* 범위 기능을 사용하면 반복문 구성이 가능하다.
+* 증가 값에 대한 제어는 step 키워드를 사용한다.
+* 반만 닫힌 구간(half-closed range)에 대한 반복문은 until 키워드를 사용한다.
+
+```kotlin
+package action.`in`.blog
+
+fun fizzBuzz(number: Int) =
+    when {
+        number % 15 == 0 -> "FizzBuzz"
+        number % 5 == 0 -> "Buzz"
+        number % 3 == 0 -> "Fizz"
+        else -> "${number}"
+    }
+
+fun main(args: Array<String>) {
+
+    for (index in 1..100) {
+        println(fizzBuzz(index))
+    }
+
+    for (index in 100 downTo 1 step 2) {
+        println(fizzBuzz(index))
+    }
+
+    for (index in 0 until 100) {
+        println(fizzBuzz(index))
+    }
+}
+```
+
+#### 2.4.3. 맵에 대한 이터레이션
+
+* 맵 객체의 in 키워드를 사용한 반복문은 엔트리 형태로 데이터를 추출할 수 있다.
+
+```kotlin
+package action.`in`.blog
+
+import java.util.*
+
+val binaryTree = TreeMap<Char, String>()
+
+fun main(args: Array<String>) {
+
+    for (c in 'A'..'F') {
+        val binary = Integer.toBinaryString(c.code)
+        binaryTree[c] = binary
+    }
+
+    for ((letter, binary) in binaryTree) {
+        println("$letter = $binary")
+    }
+
+    for ((key) in binaryTree) {
+        println("$key = ${binaryTree[key]}")
+    }
+
+    val list = arrayListOf("10", "11", "1001")
+    for ((index, element) in list.withIndex()) {
+        println("${index}: $element")
+    }
+}
+```
+
+#### 2.4.4. in으로 컬렉션이나 범위의 원소 검사
+
+* in 연산자를 사용해 어떤 값이 범위에 속하는지 검사할 수 있다.
+* 반대로 !in을 사용하면 어떤 값이 범위에 속하지 않는지 검사할 수 있다.
+* in, !in 연산자를 when 식에 사용해도 된다.
+
+```kotlin
+package action.`in`.blog
+
+fun isLetter(c: Char) = c in 'a'..'z' || c in 'A'..'Z'
+fun isNotDigit(c: Char) = c !in '0'..'9'
+fun recognize(c: Char) =
+    when (c) {
+        in '0'..'9' -> "It is a digit"
+        in 'a'..'z', in 'A'..'Z' -> "It is a letter"
+        else -> "I don't know"
+    }
+
+
+fun main(args: Array<String>) {
+    println(isLetter('A')) // true
+    println(isLetter('f')) // true
+    println(isNotDigit('v')) // true
+    println(isNotDigit('0')) // false
+
+    println(recognize('A'))
+    println(recognize('f'))
+    println(recognize('v'))
+    println(recognize('0'))
+}
+```
+
+* 범위는 문자에만 국한되지 않는다.
+* 비교가 가능한 클래스(Comparable 인터페이스 구현 클래스)라면 인스턴스 객체를 사용해 범위를 만들 수 있다.
+* Comparable을 사용하는 범위의 경우 그 범위 내의 모든 객체를 사용해 범위를 만들 수 있다.
+
+```kotlin
+fun main(args: Array<String>) {
+
+    println("Kotlin" in "Java".."Scala") // true
+    println("Kotlin" in setOf("Java", "Scala")) // flase
+}
+```
+
+### 2.5. 코틀린의 예외 처리
+
+* 자바의 예외 처리와 비슷하다.
+* 함수는 정상적으로 종료할 수 있지만, 오류가 발생하면 예외를 던질 수 있다.
+* 함수를 호출하는 쪽에서는 그 예외를 잡아 처리할 수 있다.
+* 발생한 예외를 함수 호출 단에서 처리(catch)하지 않으면 함수 호출 스택을 거슬러 올라가면서 예외를 처리하는 부분이 나올 때까지 예외를 던진다.
+* 자바와 마찬가지로 예외를 처리하려면 try, catch, finally 절을 함께 사용한다.
+* 자바와 달리 throws 절이 코드에 없다.
+    * 예를 들어 IOException 같은 경우 확인해야하는 예외(checked exception)이므로 예외 처리를 명시적으로 해줘야했다.
+    * 코틀린은 확인이 필요한 예외와 불필요한 예외를 구별하지 않는다.
+* 코틀린에서는 함수가 던지는 예외를 지정하지 않고 발생한 예외를 잡아내도 되고 잡아내지 않아도 된다.
+
+```kotlin
+package action.`in`.blog
+
+fun getPercentage(number: Int) = if (number in 0..100) number
+else throw IllegalArgumentException("A percentage value must be between 0 and 100: $number")
+
+fun main(args: Array<String>) {
+
+    try {
+        val percentage = getPercentage(111)
+        println("$percentage")
+    } catch (exception: RuntimeException) {
+        println("exception message: ${exception.message}")
+    } finally {
+        println("finally")
+    }
+}
+```
+
+* 자바의 예외 처리는 강력하지만, 프로그래머들이 의미 없이 예외를 다시 던지거나 처리하지 않고 무시하는 경우가 많다.
+    * 예외 처리 규칙이 실제로는 오류 발생을 방지하지 못하는 경우가 자주 있다.
+* 코틀린은 try-with-resource 구문을 지원하지 않지만, 라이브러리 함수로 같은 기능을 구현할 수 있다.
+
+#### 2.5.2. try를 식으로 사용
+
+* 코틀린의 try 키워드는 if나 when과 마찬가지로 식으로 사용할 수 있다.
+* try의 값을 변수에 대입할 수 있다.
+* if와 달리 try의 본문을 반드시 중괄호({})로 둘러싸야 한다.
+* 다른 문장과 마찬가지로 try의 본문도 내부에 여러 문장이 있으면 마지막 식의 값이 전체 결과 값이다.
+* try-catch 문을 식으로 사용할 때 catch 블럭에 return 이 있는 경우
+    * catch 블럭 이후 로직을 실행하지 않는다.
+    * 함수를 그대로 종료한다.
+* try-catch 문을 식으로 사용할 때 catch 블럭에 return 이 없는 경우
+    * 코드는 그대로 실행된다.
+    * catch 블럭에서 특정 값을 반환하지 않는 경우 Unit 객체가 반환된다.
+    * catch 블럭에서 특정 값을 반환하는 경우 해당 값이 반환된다.
+
+```kotlin
+fun readNumber(reader: BufferedReader) {
+    val number = try {
+        Integer.parseInt(reader.readLine())
+    } catch (exception: NumberFormatException) {
+        println("exception message: ${exception.message}")
+        0
+        // return
+    }
+    println(number)
+}
+```

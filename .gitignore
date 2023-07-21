@@ -1,1 +1,6 @@
 .DS_Store
+
+# Intelli J
+out
+.idea
+*.iml
