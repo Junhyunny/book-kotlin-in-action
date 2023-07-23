@@ -549,4 +549,60 @@ class MyButton : View {
 #### 4.2.3. 인터페이스에 선언된 프로퍼티 구현
 
 * 코틀린에서는 인터페이스에 추상 프로퍼티 선언을 넣을 수 있다.
+* 아래 User 인터페이스를 구현하는 클래스는 nickname의 값을 얻을 수 있는 방법을 제공해야 한다는 의미이다.
+    * 인터페이스는 아무 상태도 포함할 수 없으므로 상태를 저장할 필요가 있다면 인터페이스를 구현한 하위 클래스에서 상태 저장을 위한 프로퍼티 등을 만들어야 한다.
 
+```kotlin
+package blog.`in`.action.h
+
+interface User {
+    val nickname: String
+}
+```
+
+* PrivateUser 클래스
+    * 주 생성자 안에 프로퍼티를 직접 선언하는 간결한 구문 사용
+    * 프로퍼티가 User 인터페이스의 추상 프로퍼티를 구현하고 있음을 override로 표시
+* SubscribingUser 클래스
+    * 커스텀 게터(getter)를 사용
+    * 필드 값을 저장하지 않고 매번 이메일 주소에서 별명을 계산한다.
+* FacebookUser 클래스
+    * 초기화 식으로 nickname 값을 초기화한다.
+    * getFacebookName 함수는 페이스북 인증을 거친 후 원하는 데이터를 가져와야 하기 때문에 비용이 많이 들 수 있다.
+    * 객체를 초기화하는 단계에 한 번만 호출하도록 설계한다.
+
+```kotlin
+package blog.`in`.action.h
+
+class PrivateUser(override val nickname: String) : User // 주 생성자에 있는 프로퍼티
+
+class SubscribingUser(val email: String) : User {
+    override val nickname: String
+        get() = email.substringBefore("@") // 커스텀 getter
+}
+
+class FacebookUser(val accountId: Int) : User {
+
+    override val nickname = getFacebookName(accountId) // 프로퍼티 초기화 식
+
+    private fun getFacebookName(accountId: Int): String {
+        return ""
+    }
+}
+```
+
+* 인터페이스에는 추상 프로퍼티뿐 아니라 게터와 세터가 있는 프로퍼티를 선언할 수도 있다.
+    * email 프로퍼티는 반드시 오버라이드해야 한다.
+    * nickname 프로퍼티는 오버라이드하지 않고 상속할 수 있다.
+
+```kotlin
+interface User {
+    val email: String
+    val nickname: String
+        get() = email.substringBefore("@")
+}
+```
+
+#### 4.2.4. 게터와 세터에서 뒷받침하는 필드에 접근
+
+* 
