@@ -1,4 +1,4 @@
-package action.`in`.blog
+package action.`in`.blog.e
 
 interface Expression
 class Num(val value: Int) : Expression // value라는 프로퍼티만 존재하는 단순한 클래스, Expression을 구현

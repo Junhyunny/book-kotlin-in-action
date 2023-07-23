@@ -103,7 +103,7 @@ println("Hello ${if (args.isNotEmpty()) args[0] else "Kotlin"}")
 * 코틀린의 기본 가시성은 public 이다.
 
 ```kotlin
-package action.`in`.blog
+package action.`in`.blog.b
 
 class Person(val name: String)
 ```
@@ -115,9 +115,9 @@ class Person(val name: String)
 * 다음과 같은 방법으로 변경 가능한 프로퍼티를 선언한다.
 
 ```kotlin
-class Person (
-    val name: String,
-    var isMarried: Boolean 
+class Person(
+    val name: String, // 읽기 전용 프로퍼티, 코틀린은 비공개 필드와 필드를 읽는 단순한 공개 게터(getter)를 만든다.
+    var isMarried: Boolean // 쓸 수 있는 프로퍼티로 비공개 필드와 공개 게터, 공개 세터(setter)를 만든다.
 )
 ```
 
@@ -129,21 +129,32 @@ class Person (
 * 클라이언트가 프로퍼티에 접근할 때마다 게터가 프로퍼티 값을 매번 다시 계산한다. 
 
 ```kotlin
-package action.`in`.blog
+package action.`in`.blog.c
+
+import java.util.*
 
 class Rectangle(
     val height: Int,
     val width: Int
 ) {
-
     val isSquare: Boolean
-        get() { // 프로퍼티 게터 선언
-            return height == width
-        }
+        get() = height == width
+}
+
+fun createRandomRectangle(): Rectangle {
+    val random = Random()
+    return Rectangle(random.nextInt(), random.nextInt())
+}
+
+fun main(args: Array<String>) {
+
+    val rectangle = Rectangle(41, 43)
+    println(rectangle.isSquare)
+    println(createRandomRectangle().isSquare)
 }
 ```
 
-#### 2.2.3. 코틀린 소스코드 구조
+#### 2.2.3. 코틀린 소스 코드 구조
 
 * 자바의 경우 모든 클래스를 패키지 단위로 관리한다.
 * 모든 코틀린 파일의 맨 앞에 package 문을 넣을 수 있다.
@@ -162,7 +173,7 @@ class Rectangle(
 * enum 클래스 안에도 프로퍼티나 메소드를 정의할 수 있다.
 
 ```kotlin
-package action.`in`.blog
+package action.`in`.blog.d
 
 enum class Color(
     val red: Int, val green: Int, val blue: Int // 상수의 프로퍼티를 정의한다
@@ -256,7 +267,7 @@ fun mixOptimized(color1: Color, color2: Color) =
 * 원하는 타입으로 명시적으로 타입 캐스팅을 하려면 as 키워드를 사용해야 한다.
 
 ```kotlin
-package action.`in`.blog
+package action.`in`.blog.e
 
 import java.lang.IllegalArgumentException
 
@@ -343,7 +354,7 @@ val oneToTen = 1..10
 * 반만 닫힌 구간(half-closed range)에 대한 반복문은 until 키워드를 사용한다.
 
 ```kotlin
-package action.`in`.blog
+package action.`in`.blog.f
 
 fun fizzBuzz(number: Int) =
     when {
@@ -374,7 +385,7 @@ fun main(args: Array<String>) {
 * 맵 객체의 in 키워드를 사용한 반복문은 엔트리 형태로 데이터를 추출할 수 있다.
 
 ```kotlin
-package action.`in`.blog
+package action.`in`.blog.g
 
 import java.util.*
 
@@ -409,7 +420,7 @@ fun main(args: Array<String>) {
 * in, !in 연산자를 when 식에 사용해도 된다.
 
 ```kotlin
-package action.`in`.blog
+package action.`in`.blog.h
 
 fun isLetter(c: Char) = c in 'a'..'z' || c in 'A'..'Z'
 fun isNotDigit(c: Char) = c !in '0'..'9'
@@ -420,8 +431,8 @@ fun recognize(c: Char) =
         else -> "I don't know"
     }
 
-
 fun main(args: Array<String>) {
+
     println(isLetter('A')) // true
     println(isLetter('f')) // true
     println(isNotDigit('v')) // true
@@ -439,11 +450,8 @@ fun main(args: Array<String>) {
 * Comparable을 사용하는 범위의 경우 그 범위 내의 모든 객체를 사용해 범위를 만들 수 있다.
 
 ```kotlin
-fun main(args: Array<String>) {
-
     println("Kotlin" in "Java".."Scala") // true
     println("Kotlin" in setOf("Java", "Scala")) // flase
-}
 ```
 
 ### 2.5. 코틀린의 예외 처리
@@ -459,13 +467,13 @@ fun main(args: Array<String>) {
 * 코틀린에서는 함수가 던지는 예외를 지정하지 않고 발생한 예외를 잡아내도 되고 잡아내지 않아도 된다.
 
 ```kotlin
-package action.`in`.blog
+package action.`in`.blog.i
 
-fun getPercentage(number: Int) = if (number in 0..100) number
-else throw IllegalArgumentException("A percentage value must be between 0 and 100: $number")
+fun getPercentage(number: Int) =
+    if (number in 0..100) number
+    else throw IllegalArgumentException("A percentage value must be between 0 and 100: $number")
 
 fun main(args: Array<String>) {
-
     try {
         val percentage = getPercentage(111)
         println("$percentage")

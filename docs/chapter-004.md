@@ -22,7 +22,7 @@
 * 인터페이스에는 아무런 상태(필드)도 들어갈 수 없다.
 
 ```kotlin
-package blog.`in`.action
+package blog.`in`.action.a
 
 interface Clickable {
 
@@ -38,7 +38,7 @@ interface Clickable {
     * 상위 클래스에 있는 메소드와 시그니처가 같은 메소드를 우연히 하위 클래스에서 선언하는 경우 컴파일이 되지 않기 때문에 overrid를 붙이거나 메소드 이름을 바꿔야만 한다.
 
 ```kotlin
-package blog.`in`.action
+package blog.`in`.action.a
 
 class Button : Clickable {
 
@@ -58,7 +58,7 @@ fun main() {
 * click 메소드는 반드시 재정의가 필요하지만, showOff 메소드는 재정의를 생략해서 디폴트 구현을 사용해도 무관하다.
 
 ```kotlin
-package blog.`in`.action
+package blog.`in`.action.a
 
 interface Clickable {
 
@@ -68,9 +68,10 @@ interface Clickable {
 ```
 
 ```kotlin
-package blog.`in`.action
+package blog.`in`.action.a
 
 interface Focusable {
+    
     fun setFocus(boolean: Boolean) {
         println("I ${if (boolean) "got" else "lost"} focus.")
     }
@@ -84,7 +85,7 @@ interface Focusable {
 * 인터페이스의 디폴트 메소드를 호출하는 것도 가능하다.
 
 ```kotlin
-package blog.`in`.action
+package blog.`in`.action.a
 
 class Button : Clickable, Focusable {
 
@@ -103,13 +104,13 @@ fun main() {
     val button = Button()
     button.click()
     button.showOff()
+    button.setFocus(false)
 }
 ```
 
 #### 4.1.2. open, final, abstract 변경자
 
-* 자바는 final 키워드가 명시적으로 붙지 않은 경우 모두 상속이 가능하다.
-* 편리하기도 하지만, 문제가 생기는 경우도 많다.
+* 자바는 final 키워드가 명시적으로 붙지 않은 경우 모두 상속이 가능하다. 편리하기도 하지만, 문제가 생기는 경우도 많다.
 * 취약한 기반 클래스(fragile base class)라는 문제는 하위 클래스가 기반 클래스에 대해 가졌던 가정이 기반 클래스를 변경함으로써 깨져버린 경우에 생긴다.
 * 어떤 클래스가 자신을 상속하는 방법에 대해 정확한 규칙을 제공하지 않는다면 그 클래스의 클라이언트는 기반 클래스를 작성한 사람의 의도와 다른 방식으로 메소드를 오버라이드할 위험이 있다.
 * 모든 하위 클래스를 분석하는 것은 불가능하다.
@@ -117,9 +118,11 @@ fun main() {
 * 특별히 하위 클래스에서 오버라이드하게 의도된 클래스와 메소드가 아니라면 모두 final로 만드는 것이 안정적이다.
 
 ```kotlin
-package blog.`in`.action
+package blog.`in`.action.b
 
-open class RichButton: Clickable { // open 키워드로 클래스 상속을 허용한다.
+import blog.`in`.action.a.Clickable
+
+open class RichButton : Clickable { // open 키워드로 클래스 상속을 허용한다.
 
     fun disable() {
         // 파이널 함수
@@ -163,7 +166,7 @@ open class RichButton: Clickable {
 * 추상 멤버 앞에 open 변경자를 명시할 필요가 없다.
 
 ```kotlin
-package blog.`in`.action
+package blog.`in`.action.b
 
 abstract class Animated { // 이 클래스는 추상 클래스이다. 인스턴스를 만들 수 없다.
 
@@ -227,14 +230,18 @@ abstract class Animated { // 이 클래스는 추상 클래스이다. 인스턴�
     * 컴파일 시점에 오류가 감지된다.
 
 ```kotlin
+package blog.`in`.action.c
+
+import blog.`in`.action.a.Focusable
+
 internal open class TalkativeButton: Focusable {
     private fun yell() = println("Hey")
     protected fun whisper() = println("Let's talk")
 }
 
-fun TalkativeButton.giveSpeech() { // public 멤버가 자신의 internal 수신 타입인 TalkativeButton을 노출한다.
-    yell() // public 확장 함수는 private yell에 접근할 수 없다.
-    whisper() // public 확장 함수는 protected whisper에 접근할 수 없다.
+fun TalkativeButton.giveSpeech() { // public 멤버가 자신의 internal 수신 타입인 TalkativeButton 을 노출한다.
+    yell() // public 확장 함수는 private yell 함수에 접근할 수 없다.
+    whisper() // public 확장 함수는 protected whisper 함수에 접근할 수 없다.
 }
 ```
 
@@ -263,7 +270,283 @@ fun TalkativeButton.giveSpeech() { // public 멤버가 자신의 internal 수신
 * 자바와의 차이는 코틀린의 중첩 클래스(nested class)는 명시적으로 요청하지 않는 한 바깥쪽 클래스 인스턴스에 대한 접근 권한이 없다는 점이다.
 
 * 자바 코드의 경우 중첩 클래스의 직렬화는 다음과 같은 문제가 있다.
+    * Button 클래스에 대한 NotSerializableException 발생
+    * 자바는 클래스 안에 정의한 클래스는 외부 클래스에 대한 참조를 묵시적으로 포함한다.
+    * ButtonState를 직렬화하려면 Button을 직렬해야하므로 에러가 발생한다.
+    * 이 문제를 해결하려면 static 클래스로 선언해야 한다.
 
 ```java
+public class Button implements View {
 
+    @Override
+    public State getCurrentState() {
+        return new ButtonState();
+    }
+
+    @Override
+    public void restoreState(State state) { /* ... */ }
+
+    public class ButtonState implements State { /* ... */ }
+}
 ```
+
+* 코틀린 코드는 중첩 클래스에 아무런 변경자가 붙지 않으면 자바 static 중첩 클래스와 같다.
+    * 내부 클래스로 변경하여 바깥쪽 클래스에 대한 참조를 포함하게 만들고 싶은 경우 inner 변경자를 사용한다.
+
+| 클래스 B 안에 정의된 클래스 A | 자바 | 코틀린 | 
+|:-|:-|:-|
+|중첩 클래스(바깥쪽 클래스에 대한 참조를 저장하지 않음)|static class A|class A|
+|내부 클래스(바깥쪽 클래스에 대한 참조를 저장함)|class A|inner class A|
+
+* 코틀린 바깥쪽 클래스의 인스턴스를 가리키는 참조를 표기하는 방법도 자바와 다르다.
+    * this@Outer 라고 작성한다.
+
+```kotlin
+package blog.`in`.action.d
+
+class Outer {
+
+    inner class Inner {
+        fun getOuterReference(): Outer = this@Outer
+    }
+}
+```
+
+#### 4.1.5. 봉인된 클래스
+
+* 반드시 else 분기 처리가 필요하다.
+* else에 반환할만한 값이 없으므로 예외를 던진다.
+
+```kotlin
+package blog.`in`.action.e
+
+interface NotSealedExpr
+class Num(val value: Int) : NotSealedExpr
+class Sum(val left: NotSealedExpr, val right: NotSealedExpr) : NotSealedExpr
+
+fun notSealedEval(expr: NotSealedExpr): Int =
+    when (expr) {
+        is Num -> expr.value
+        is Sum -> notSealedEval(expr.left) + notSealedEval(expr.right)
+        else ->
+            throw IllegalArgumentException("unknown expression")
+    }
+```
+
+* 항상 디폴트 분기를 추가하는 것은 쉽지 않다.
+* 디폴트 분기가 있으면 클래스 계층에 새로운 하위 클래스가 추가되더라도 컴파일러가 모든 경우를 처리하는지 제대로 알 수 없다.
+* 새로운 클래스 처리를 잊어버렸더라도 디폴트 분기가 선택되기 때문에 버그가 발생할 수 있다.
+
+* 코틀린은 sealed 클래스를 통해 이런 문제를 해결한다.
+* 상위 클래스에 sealed 변경자를 붙이면 그 상위 클래스를 상속한 하위 클래스 정의를 제한할 수 있다.
+* sealed 클래스의 하위 클래스를 정의할 때는 반드시 상위 클래스 안에 중첩시켜야 한다.
+* when 식에서 sealed 클래스의 모든 하위 클래스를 처리한다면 디폴트 분기가 필요없다.
+* sealed로 표시된 클래스는 자동으로 open이다.
+* 봉인된 클래스는 클래스 외부에 자신을 상속한 클래스를 둘 수 없다.
+* sealed 클래스에 속한 값에 대해 디폴트 분기를 사용하지 않고 when 식을 사용하면 나중에 sealed 클래스의 상속 계층에 새로우 하위 클래스를 추가했을 때 컴파일 에러가 발생한다. 이는 when 식을 고쳐야 한다는 사실을 쉽게 파악할 수 있다.
+
+```kotlin
+package blog.`in`.action.e
+
+sealed class Expr { // 기반 클래스를 sealed 봉인
+    class Num(val value: Int) : Expr() // 기반 클래스의 모든 하위 클래스를 중첩 클래스로 나열한다.
+    class Sum(val left: Expr, val right: Expr) : Expr()
+}
+
+fun eval(expr: Expr): Int =
+    when (expr) {
+        is Expr.Num -> expr.value
+        is Expr.Sum -> eval(expr.left) + eval(expr.right)
+    }
+```
+
+* sealed 인터페이스는 정의할 수 없다.
+    * 봉인된 인터페이스를 자바 쪽에서 구현하지 못하게 막을 수 있는 방법이 없기 때문이다.
+* 코틀린 1.0에서 sealed는 제약이 심했다. 
+    * 하위 클래스는 중첩 클래스로 정의되어야 했다.
+    * 데이터 클래스는 sealed 클래스를 상속할 수도 없다.
+* 코틀린 1.5부터는 봉인된 클래스가 정의된 패키지 안의 아무 위치(최상단, 다른 클래스, 객체, 인터페이스에 내포된 위치)에 선언할 수 있다.
+    * 봉인된 인터페이스도 추가되었다.
+
+### 4.2. 뻔하지 않은 생성자와 프로퍼티를 갖는 클래스 선언
+
+* 코틀린도 자바처럼 생성자를 하나 이상 선언할 수 있다.
+    * 주 생성자는 클래스를 초기화 할 때 주로 사용하는 간략한 생성자로 클래스 본문 밖에 선언한다.
+    * 부 생성자는 클래스 본문 안에 선언한다.
+* 초기화 블록을 통해 초기화 로직을 추가할 수 있다.
+
+#### 4.2.1. 클래스 초기화: 주 생성자와 초기화 블록
+
+* 보통 클래스의 모든 선언은 중괄호({}) 사이에 들어간다.
+* 주 생성자는 중괄호가 없고 괄호 사이에 val 선언만 존재한다.
+* 클래스 이름 뒤에 오는 괄호로 둘러싸인 코드를 주 생성자라고 부른다.
+    * 파라미터를 지정한다. 
+    * 생성자 파라미터에 의해 초기화되는 프로퍼티를 정의한다.
+
+* constructor 키워드
+    * 주 생성자나 부 생성자 정의를 시작할 때 사용
+* init 키워드
+    * 초기화 블럭을 시작한다.
+    * 클래스의 객체가 만들어질 때(인스턴스화될 때) 실행될 초기화 코드가 들어간다.
+    * 초기화 블록은 주 생성자와 함께 사용된다.
+    * 주 생성자는 제한적이기 때문에 별도의 코드를 포함할 수 없으므로 초기화 블록이 필요하다.
+    * 필요한 경우 클래스 안에 여러 초기화 블록을 선언할 수 있다.
+
+```kotlin
+package blog.`in`.action.f
+
+class User constructor(_nickname: String) { // 파라미터가 한 개만 있는 생성자
+
+    val nickname: String
+
+    init { // 초기화 블럭
+        nickname = _nickname
+    }
+}
+```
+
+* 다음에 나오는 생성자 선언 방식은 모두 같은 방식이다.
+
+```kotlin
+class User(_nickname: String) {
+    val nickname = _nickname;
+}
+```
+
+```kotlin
+class User(val nickname: String)
+```
+
+* 함수 파라미터와 마찬가지로 생성자 파라미터에도 디폴트 값을 지정할 수 있다.
+
+```kotlin
+class User(val nickname: String, val isSubscribed: Boolean = false)
+
+fun main() {
+    val jun = User("jun")
+    println(jun.nickname)
+    println(jun.isSubscribed)
+}
+```
+
+* 모든 생성자 파라미터에 디폴트 값을 지정하면 컴파일러가 자동으로 파라미터가 없는 생성자를 만든다.
+* 그렇게 자동으로 만들어진 파라미터 없는 생성자는 디폴트 값을 사용해 클래스를 초기화한다.
+* 의존성 주입(DI, Dependency Injection) 프레임워크 등 자바 라이브러리 중에 파라미터가 없는 생성자를 통해 객체를 생성해야만 라이브러리 사용이 가능한 경우가 있다.
+* 코틀린이 제공하는 파라미터 없는 생성자는 그런 라이브러리와의 통합을 쉽게 돕는다.
+
+* 클래스에 기반 클래스가 있다면 주 생성자는 기반 클래스의 생성자를 호출할 필요가 있다.
+* 기반 클래스를 초기화하려면 기반 클래스 이름 뒤에 괄호를 치고 생성자 인자를 넘긴다.
+
+```kotlin
+open class User(val nickname: String, val isSubscribed: Boolean = false)
+
+class TwitterUser(nickname: String): User(nickname)
+```
+
+* 클래스를 정의할 때 별도로 생성자를 정의하지 않으면 컴파일러가 자동으로 아무 일도 하지 않는 인자가 없는 디폴트 생성자를 만든다.
+* Button의 생성자는 아무 인자도 받지 않지만, Button 클래스를 상속한 하위 클래스는 반드시 Button 클래스의 생성자를 호출해야 한다.
+    * 이 규칙으로 기반 클래스의 이름 뒤에는 반드시 빈 괄호가 들어간다.
+* 반면 인터페이스는 생성자가 없기 때문에 어떤 클래스가 인터페이스를 구현하더라고 괄호가 필요하지 않는다.
+
+```kotlin
+package blog.`in`.action.f
+
+open class Button
+
+class RadioButton : Button()
+```
+
+* 클래스 외부에서 인스턴스화하지 못하게 막으려면 모든 생성자를 private으로 만든다.
+* 주 생성자가 비공개이므로 외부에서 Secretive를 인스턴스화 할 수 없다.
+
+```kotlin
+package blog.`in`.action.f
+
+class Secretive private constructor() // 이 클래스의 유일한 주 생성자는 비공개
+```
+
+#### 4.2.2. 부 생성자: 상위 클래스를 다른 방식으로 초기화
+
+* 일반적으로 코틀린에서 생성자가 여럿 있는 경우가 자바보다 훨씬 적다.
+* 자바에서 오버로드한 생성자가 필요한 상황 중 상당수는 코틀린의 디폴트 파라미터 값과 이름 붙인 인자 문법을 사용해 해결할 수 있다.
+    * 인자에 대한 디폴트 값을 제공하기 위해 부 생성자를 여럿 만들지 말라.
+    * 파라미터 디폴트 값을 시그니처 직접 명시해라.
+
+```kotlin
+package blog.`in`.action.f
+
+import javax.naming.Context
+import javax.swing.text.AttributeSet
+
+open class View {
+
+    val context: Context
+    val attributeSet: AttributeSet?
+
+    constructor(context: Context) { // 부 생성자
+        this.context = context
+        this.attributeSet = null
+    }
+
+    constructor(context: Context, attributeSet: AttributeSet) { // 부 생성자
+        this.context = context
+        this.attributeSet = attributeSet
+    }
+}
+
+class MyButton : View {
+
+    constructor(context: Context) : super(context) { // 부 생성자
+
+    }
+
+    constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet) { // 부 생성자
+        
+    }
+}
+```
+
+* 자바와 마찬깆로 생성자에서 this()를 통해 클래스 자신의 다른 생성자를 호출할 수 있다.
+
+```kotlin
+package blog.`in`.action.f
+
+import javax.naming.Context
+import javax.swing.text.AttributeSet
+
+open class View {
+
+    val context: Context
+    val attributeSet: AttributeSet?
+
+    constructor(context: Context) { // 부 생성자
+        this.context = context
+        this.attributeSet = null
+    }
+
+    constructor(context: Context, attributeSet: AttributeSet?) { // 부 생성자
+        this.context = context
+        this.attributeSet = attributeSet
+    }
+}
+
+class MyButton : View {
+
+    constructor(context: Context) : this(context, null) { // 다른 생성자에게 위임한다.
+
+    }
+
+    constructor(context: Context, attributeSet: AttributeSet?) : super(context, attributeSet) { // 부 생성자
+
+    }
+}
+```
+
+* 클래스에 주 생성자가 없다면 모든 부 생성자는 반드시 상위 클래스를 초기화하거나 다른 생성자에게 생성을 위임한다.
+* 각 부 생성자에서 객체 생성을 위임하는 화살표를 따라가면 상위 클래스 생성자를 호출하는 화살표가 있어야 한다.
+* 부 생성자가 필요한 주된 이유는 자바 상호 운용성이다.
+
+#### 4.2.3. 인터페이스에 선언된 프로퍼티 구현
+
+* 코틀린에서는 인터페이스에 추상 프로퍼티 선언을 넣을 수 있다.
+

@@ -1,4 +1,4 @@
-package action.`in`.blog
+package action.`in`.blog.h
 
 fun isLetter(c: Char) = c in 'a'..'z' || c in 'A'..'Z'
 fun isNotDigit(c: Char) = c !in '0'..'9'
@@ -9,8 +9,8 @@ fun recognize(c: Char) =
         else -> "I don't know"
     }
 
-
 fun main(args: Array<String>) {
+
     println(isLetter('A')) // true
     println(isLetter('f')) // true
     println(isNotDigit('v')) // true

@@ -1,4 +1,4 @@
-package action.`in`.blog
+package action.`in`.blog.f
 
 fun fizzBuzz(number: Int) =
     when {

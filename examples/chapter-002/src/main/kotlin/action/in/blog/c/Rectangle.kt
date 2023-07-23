@@ -1,13 +1,11 @@
-package action.`in`.blog
+package action.`in`.blog.c
 
 import java.util.*
-
 
 class Rectangle(
     val height: Int,
     val width: Int
 ) {
-
     val isSquare: Boolean
         get() = height == width
 }

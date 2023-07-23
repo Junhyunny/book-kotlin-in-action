@@ -1,4 +1,4 @@
-package action.`in`.blog
+package action.`in`.blog.d
 
 enum class Color(
     val red: Int, val green: Int, val blue: Int // 상수의 프로퍼티를 정의한다
