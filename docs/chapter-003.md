@@ -6,7 +6,7 @@
 * 맵을 만들 때 to 키워드는 특별한 키워드가 아니라 일반 함수이다.
 
 ```kotlin
-package action.`in`.blog
+package action.`in`.blog.a
 
 val set = hashSetOf(1, 2, 3, 7, 53)
 val list = arrayListOf(1, 2, 3, 7, 53)
@@ -55,7 +55,7 @@ class java.util.HashMap
 ### 3.2. 함수를 호출하기 쉽게 만들기
 
 ```kotlin
-package action.`in`.blog
+package action.`in`.blog.b
 
 fun <T> joinToString(
     collection: Collection<T>,
@@ -104,7 +104,7 @@ fun main() {
 * 디폴트 파라미터 값은 함수를 선언할 때 지정한다.
 
 ```kotlin
-package action.`in`.blog
+package action.`in`.blog.b
 
 fun <T> joinToString(
     collection: Collection<T>,
@@ -184,7 +184,7 @@ const val UNIX_LINE_SEPARATOR = "\n"
     * this - 수신 객체, 로직 안에서 생략 가능
 
 ```kotlin
-package action.`in`.blog
+package action.`in`.blog.c
 
 fun String.lastChar(): Char = this.get(this.length - 1)
 
@@ -209,9 +209,9 @@ fun main() {
     * 한 파일 안에서 다른 여러 패키지에 속해 있는 이름이 같은 함수를 사용하는 경우 이름을 바꿔 임포트하면 충돌을 방지할 수 있다.
 
 ```kotlin
-package action.`in`.blog.import
+package action.`in`.blog.d
 
-import action.`in`.blog.extend.lastChar as last
+import action.`in`.blog.c.lastChar as last
 
 fun main() {
     // println("Hello World".lastChar())
@@ -236,7 +236,7 @@ char c = StringUtilsKt.lastChar("Hello World");
     * 여기선 T 타입의 원소로 이뤄진 컬렉션이다.
 
 ```kotlin
-package action.`in`.blog.extend
+package action.`in`.blog.e
 
 fun <T> Collection<T>.customJoinToString(
     separator: String = ",",
@@ -264,7 +264,7 @@ fun main() {
     * 숫자 컬렉션으로 join 함수를 호출하면 컴파일 에러가 발생한다.
 
 ```kotlin
-package action.`in`.blog.extend
+package action.`in`.blog.e
 
 fun <T> Collection<T>.customJoinToString(
     separator: String = ",",
@@ -306,10 +306,9 @@ fun main() {
 * 코틀린은 호출될 확장 함수를 정적으로 결정하기 때문에 확장 함수를 오버라이드할 수 없다.
 
 ```kotlin
-package action.`in`.blog.override
+package action.`in`.blog.f
 
 open class View {
-
     open fun click() = println("View Clicked")
 }
 
@@ -341,7 +340,7 @@ fun main() {
     * 초기화 코드에서 계산한 값을 담을 장소가 전혀 없으므로 초기화 코드도 쓸 수 없다.
 
 ```kotlin
-package action.`in`.blog.extend
+package action.`in`.blog.g
 
 val String.lastChar: Char
     get() = get(length - 1)
@@ -420,7 +419,7 @@ public infix fun <A, B> A.to(that: B): Pair<A, B> = Pair(this, that)
 * 다음과 같이 구조 분해 선언을 사용해 변수에 값을 할당할 수 있다.
 
 ```kotlin
-package action.`in`.blog.infix
+package action.`in`.blog.h
 
 fun main() {
 
@@ -443,7 +442,7 @@ fun main() {
 * 정규식을 파라미터로 받는 함수는 String이 아닌 Regex 타입의 값을 받는다.
 
 ```kotlin
-package action.`in`.blog.regex
+package action.`in`.blog.i
 
 fun main() {
     println("12.345-6.A".split(".", "-"))
@@ -458,7 +457,7 @@ fun main() {
 * 정규식은 강력하지만, 나중에 알아보기 힘든 경우가 많다.
 
 ```kotlin
-package action.`in`.blog.regex
+package action.`in`.blog.i
 
 fun parsePath(path: String) {
     val directory = path.substringBeforeLast("/")
@@ -479,7 +478,7 @@ fun main() {
 * 매치에 성공하면 그룹별로 분해한 매치 결과를 의미하는 destructured 프로퍼티를 각 변수에 대입하여 사용할 수 있다.
 
 ```kotlin
-package action.`in`.blog.regex
+package action.`in`.blog.i
 
 fun parsePath(path: String) {
     val regex = """(.+)/(.+)\.(.+)""".toRegex()
@@ -514,7 +513,7 @@ fun main() {
 * 다음과 같은 코드를 내부 함수를 사용해 리팩토링할 수 있다.
 
 ```kotlin
-package action.`in`.blog.refactoring
+package action.`in`.blog.j
 
 class User(
     val id: Int, val name: String, val address: String
@@ -538,7 +537,7 @@ fun main() {
 * 검증 로직의 중복을 사라지게 만들었다.
 
 ```kotlin
-package action.`in`.blog.refactoring
+package action.`in`.blog.j
 
 class User(
     val id: Int, val name: String, val address: String
@@ -566,7 +565,7 @@ fun main() {
     * user 객체를 파라미터로 넘겨주지 않아도 된다.
 
 ```kotlin
-package action.`in`.blog.refactoring
+package action.`in`.blog.j
 
 class User(
     val id: Int, val name: String, val address: String
@@ -594,7 +593,7 @@ fun main() {
     * 코드를 확장 함수로 뽑아내는 기법은 유용하다.
 
 ```kotlin
-package action.`in`.blog.refactoring
+package action.`in`.blog.j
 
 class User(
     val id: Int, val name: String, val address: String
@@ -623,7 +622,7 @@ fun main() {
 * 다음과 같이 객체에 포함시켜도 된다.
 
 ```kotlin
-package action.`in`.blog.refactoring
+package action.`in`.blog.j
 
 class User(
     val id: Int, val name: String, val address: String

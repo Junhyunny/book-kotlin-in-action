@@ -1,4 +1,4 @@
-package action.`in`.blog.extend
+package action.`in`.blog.g
 
 val String.lastChar: Char
     get() = get(length - 1)

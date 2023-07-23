@@ -1,7 +1,6 @@
-package action.`in`.blog.override
+package action.`in`.blog.f
 
 open class View {
-
     open fun click() = println("View Clicked")
 }
 

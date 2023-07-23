@@ -1,4 +1,4 @@
-package action.`in`.blog.extend
+package action.`in`.blog.c
 
 fun String.lastChar(): Char = this.get(this.length - 1)
 

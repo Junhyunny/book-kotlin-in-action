@@ -1,6 +1,6 @@
-package action.`in`.blog.import
+package action.`in`.blog.d
 
-import action.`in`.blog.extend.lastChar as last
+import action.`in`.blog.c.lastChar as last
 
 fun main() {
     // println("Hello World".lastChar())

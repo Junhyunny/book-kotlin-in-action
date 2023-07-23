@@ -1,4 +1,4 @@
-package action.`in`.blog.regex
+package action.`in`.blog.i
 
 fun parsePath(path: String) {
 //    val directory = path.substringBeforeLast("/")

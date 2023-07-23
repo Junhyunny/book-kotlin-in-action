@@ -1,4 +1,4 @@
-package action.`in`.blog.refactoring
+package action.`in`.blog.j
 
 class User(
     val id: Int, val name: String, val address: String

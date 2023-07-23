@@ -1,4 +1,4 @@
-package action.`in`.blog
+package action.`in`.blog.b
 
 fun <T> joinToString(
     collection: Collection<T>,

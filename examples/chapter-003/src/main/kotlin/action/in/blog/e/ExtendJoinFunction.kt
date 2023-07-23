@@ -1,4 +1,4 @@
-package action.`in`.blog.extend
+package action.`in`.blog.e
 
 fun <T> Collection<T>.customJoinToString(
     separator: String = ",",
