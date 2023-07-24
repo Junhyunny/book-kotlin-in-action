@@ -605,4 +605,33 @@ interface User {
 
 #### 4.2.4. 게터와 세터에서 뒷받침하는 필드에 접근
 
-* 
+* 값을 저장하는 동시에 로직을 실행할 수 있게 하기 위해서는 접근자 안에서 프로퍼티를 뒷받침하는 필드에 접근할 수 있어야 한다.
+* 코틀린에서 프로퍼티의 값을 바꿀 때는 user.address = "new value"처럼 필드 설정 구문을 사용한다.
+    * 내부적으로 address의 세터를 호출한다.
+* 접근자의 본문에서는 field라는 특별한 식별자를 통해 뒷받침하는 필드에 접근할 수 있다.
+    * 게터에서 field 값을 읽을 수만 있고, 세터에서는 field 값을 읽거나 쓸 수 있다.
+
+```kotlin
+package blog.`in`.action.j
+
+class CustomUser(val name: String) {
+
+    var address: String = "unspecified"
+        set(value: String) {
+            println(
+                """
+                Address was changed for $name
+                "$field" -> "$value"
+            """.trimIndent()
+            )
+            field = value
+        }
+}
+
+fun main() {
+
+    val user = CustomUser("Alice")
+    user.address = "Elsenheimerstrasse 47,80687 Muenchen"
+}
+```
+
