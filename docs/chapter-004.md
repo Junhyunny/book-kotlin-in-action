@@ -635,3 +635,37 @@ fun main() {
 }
 ```
 
+* 컴파일러는 디폴트 접근자 구현을 사용하건 직접 게터나 세터를 정의하건 관계없이 게터나 세터에서 field를 사용하는 프로퍼티에 대해 뒷받침하는 필드를 생성해준다.
+* field를 사용하지 않는 커스텀 접근자 구현을 정의하면 뒷받침하는 필드가 존재하지 않는다.
+    * val 인 경우에는 게터에 없다.
+    * var 인 경우에는 게터, 세터에 모두 없다.
+
+#### 4.2.5. 접근자의 가시성 변경
+
+* 접근자의 가시성은 기본적으로 프로퍼티 가시성과 같다.
+* get 이나 set 앞에 가시성 변경자를 추가해서 접근자의 가시성을 변경할 수 있다.
+
+* 아래 코드는 세터를 비공개로 설정한 코드이다.
+* 클래스 밖에서 private set 설정된 프로퍼티를 변경할 수 없다.
+
+```kotlin
+package blog.`in`.action.j
+
+class LengthCounter {
+
+    var counter: Int = 0
+        private set
+
+    fun addWord(word: String) {
+        counter += word.length
+    }
+}
+
+fun main() {
+
+    val lengthCounter = LengthCounter()
+    lengthCounter.addWord("Hi")
+    println(lengthCounter.counter)
+}
+```
+
