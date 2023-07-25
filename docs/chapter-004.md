@@ -669,3 +669,132 @@ fun main() {
 }
 ```
 
+### 4.3. 컴파일러가 생성한 메소드: 데이터 클래스와 클래스 위임
+
+* 자바 플랫폼은 클래스가 equals, hashCode, toString 등의 메소드를 구현해야 한다. 
+* 코틀린 컴파일러는 이런 메소드들을 기계적으료 생성하는 작업을 보이지 않는 곳에서 해준다.
+    * 필수 메소드로 인한 잡음 없이 소스 코드를 깔끔하게 유지할 수 있다.
+
+#### 4.3.1. 모든 클래스가 정의해야 하는 메소드
+
+* 자바와 마찬가지로 toString, equals, hashCode 등 오버라이드 가능하다.
+
+```kotlin
+package blog.`in`.action.k
+
+class Client(val name: String, val postalCode: Int) 
+```
+
+* 문자열 표현
+    * 자바처럼 코틀린의 모든 클래스도 인스턴스의 문자열 표현을 얻을 방법을 제공한다.
+    * 기본 제공되는 객체의 문자열 표현은 Client@5e9f23b4 같은 방식이다.
+    * 기본 구현을 변경하려면 toString 메소드를 오버라이드해야 한다.
+
+```kotlin
+package blog.`in`.action.k
+
+class Client(val name: String, val postalCode: Int) {
+
+    override fun toString(): String {
+        return "Client(name=$name, postalCode=$postalCode)"
+    }
+}
+
+fun main() {
+
+    val client = Client("junhyunny", 12345)
+    println(client) // Client(name=junhyunny, postalCode=12345)
+}
+```
+
+* 객체의 동등성
+    * Client 클래스를 사용하는 모든 계산은 클래스 밖에서 이뤄진다.
+    * Client는 단지 데이터를 저장할 뿐이며 그에 따라 구조도 단순하고 내부 정보를 투명하게 외부에 노출한다.
+    * 클래스는 단순할지라도 동작에 대한 몇 가지 요구 사항이 있을 수 있다.
+    * 아래 예시 코드에서 두 객체는 동일한 값을 가지지만, 동일하지 않다.
+    * 두 객체를 동일하다고 판단하게 만들려면 equals 메소드를 오버라이드해야 한다.
+
+```kotlin
+fun main() {
+
+    val client = Client("junhyunny", 12345)
+    val secondClient = Client("junhyunny", 12345)
+    println(client == secondClient) // false
+}
+```
+
+* 동등성 연산에 == 사용
+    * 자바는 equals 메소드를 사용한다.
+    * 코틀린은 == 연산자를 사용하면 내부적으로 equals 메소드를 호출하여 객체를 비교한다.
+    * 클래스가 equals 메소드를 오버라이드하면 == 연산자를 통해 안전하게 클래스의 인스턴스를 비교할 수 있다.
+    * 코틀린에서 참조 비교를 위해서는 === 연산자를 사용한다.
+
+```kotlin
+package blog.`in`.action.k
+
+class Client(val name: String, val postalCode: Int) {
+
+    override fun toString(): String {
+        return "Client(name=$name, postalCode=$postalCode)"
+    }
+
+    override fun equals(other: Any?): Boolean { // Any는 자바의 Object에 대응, Any? 는 널이 될 수 있다는 의미
+        if (other == null || other !is Client) { // 널인지 Client 인스턴스인지 확인
+            return false
+        }
+        return name == other.name && // 두 객체의 프로퍼티 값이 같은지 확인
+                postalCode == other.postalCode
+    }
+}
+
+fun main() {
+
+    val client = Client("junhyunny", 12345)
+    val secondClient = Client("junhyunny", 12345)
+    println(client == secondClient) // true
+}
+```
+
+* 코틀린의 is 검사는 자바의 instanceof 기능과 동일하다.
+* is는 어떤 값의 타입인지 검사한다.
+
+* 코틀린에서는 override 변경자가 필수이므로 실수로 override fun equals(other: Client)를 작성할 수 없다.
+* equals 메소드를 잘 오버라이드하더라도 hashCode 정의를 정상적으로 동작하지 않을 수 있다. 
+
+* 해시 컨테이너: hashCode()
+    * 자바에서는 equals 메소드를 오버라이드할 때 hashCode 메소드도 함께 오버라이드해야 한다.
+    * JVM 언어에서 equals 메소드 비교가 true인 두 객체는 반드시 같은 hashCode를 반환한다는 규칙이 있다.
+
+```kotlin
+package blog.`in`.action.k
+
+class Client(val name: String, val postalCode: Int) {
+
+    override fun toString(): String {
+        return "Client(name=$name, postalCode=$postalCode)"
+    }
+
+    override fun equals(other: Any?): Boolean { // Any는 자바의 Object에 대응, Any? 는 널이 될 수 있다는 의미
+        if (other == null || other !is Client) { // 널인지 Client 인스턴스인지 확인
+            return false
+        }
+        return name == other.name && // 두 객체의 프로퍼티 값이 같은지 확인
+                postalCode == other.postalCode
+    }
+
+    override fun hashCode(): Int {
+        return name.hashCode() * 31 + postalCode
+    }
+}
+
+fun main() {
+
+    val client = Client("junhyunny", 12345)
+    val secondClient = Client("junhyunny", 12345)
+    println(client == secondClient)
+
+    val clientSet = hashSetOf(client)
+    println(clientSet.contains(secondClient)) // true after hashcode override
+}
+```
+
