@@ -685,10 +685,11 @@ package blog.`in`.action.k
 class Client(val name: String, val postalCode: Int) 
 ```
 
-* 문자열 표현
-    * 자바처럼 코틀린의 모든 클래스도 인스턴스의 문자열 표현을 얻을 방법을 제공한다.
-    * 기본 제공되는 객체의 문자열 표현은 Client@5e9f23b4 같은 방식이다.
-    * 기본 구현을 변경하려면 toString 메소드를 오버라이드해야 한다.
+##### 문자열 표현
+    
+* 자바처럼 코틀린의 모든 클래스도 인스턴스의 문자열 표현을 얻을 방법을 제공한다.
+* 기본 제공되는 객체의 문자열 표현은 Client@5e9f23b4 같은 방식이다.
+* 기본 구현을 변경하려면 toString 메소드를 오버라이드해야 한다.
 
 ```kotlin
 package blog.`in`.action.k
@@ -707,12 +708,13 @@ fun main() {
 }
 ```
 
-* 객체의 동등성
-    * Client 클래스를 사용하는 모든 계산은 클래스 밖에서 이뤄진다.
-    * Client는 단지 데이터를 저장할 뿐이며 그에 따라 구조도 단순하고 내부 정보를 투명하게 외부에 노출한다.
-    * 클래스는 단순할지라도 동작에 대한 몇 가지 요구 사항이 있을 수 있다.
-    * 아래 예시 코드에서 두 객체는 동일한 값을 가지지만, 동일하지 않다.
-    * 두 객체를 동일하다고 판단하게 만들려면 equals 메소드를 오버라이드해야 한다.
+##### 객체의 동등성
+
+* Client 클래스를 사용하는 모든 계산은 클래스 밖에서 이뤄진다.
+* Client는 단지 데이터를 저장할 뿐이며 그에 따라 구조도 단순하고 내부 정보를 투명하게 외부에 노출한다.
+* 클래스는 단순할지라도 동작에 대한 몇 가지 요구 사항이 있을 수 있다.
+* 아래 예시 코드에서 두 객체는 동일한 값을 가지지만, 동일하지 않다.
+* 두 객체를 동일하다고 판단하게 만들려면 equals 메소드를 오버라이드해야 한다.
 
 ```kotlin
 fun main() {
@@ -761,9 +763,10 @@ fun main() {
 * 코틀린에서는 override 변경자가 필수이므로 실수로 override fun equals(other: Client)를 작성할 수 없다.
 * equals 메소드를 잘 오버라이드하더라도 hashCode 정의를 정상적으로 동작하지 않을 수 있다. 
 
-* 해시 컨테이너: hashCode()
-    * 자바에서는 equals 메소드를 오버라이드할 때 hashCode 메소드도 함께 오버라이드해야 한다.
-    * JVM 언어에서 equals 메소드 비교가 true인 두 객체는 반드시 같은 hashCode를 반환한다는 규칙이 있다.
+##### 해시 컨테이너: hashCode()
+
+* 자바에서는 equals 메소드를 오버라이드할 때 hashCode 메소드도 함께 오버라이드해야 한다.
+* JVM 언어에서 equals 메소드 비교가 true인 두 객체는 반드시 같은 hashCode를 반환한다는 규칙이 있다.
 
 ```kotlin
 package blog.`in`.action.k
@@ -797,4 +800,75 @@ fun main() {
     println(clientSet.contains(secondClient)) // true after hashcode override
 }
 ```
+
+#### 4.3.2. 데이터 클래스: 모든 클래스가 정의해야 하는 메소드 자동 생성
+
+* 어떤 클래스가 데이터를 저장하는 역할을 수행하면 toString, equals, hashCode를 반드시 오버라이드해야 한다.
+* 코틀린은 편안한하게 data라는 변경자를 클래스 앞에 붙인다.
+    * data가 앞에 붙으면 데이터 클래스라고 부른다.
+* 컴파일러가 자동으로 만들어준다.
+* 자바에서 요구하는 모든 메소드를 포함한다.
+    * 인스턴스 간 비교를 위한 equals
+    * HashMap 같은 해시 기반 컨테이너에서 키로 사용할 수 있는 hashCode
+    * 클래스의 각 필드를 선언 순서대로 표시하는 문자열을 만들어주는 toString
+    * equals와 hashCode는 주 생성자에 나열된 모든 프로퍼티를 고려해서 만들어진다.
+    * 생성된 equals 메소드는 모든 프로퍼티 값의 동등성을 확인한다.
+    * hashCode 메소드는 모든 프로퍼티의 해시 값을 바탕으로 계산한 해시 값을 반환한다.
+    * 생성자 밖에 정의된 프로퍼티는 equals / hashCode를 계산할 때 고려의 대상이 아니다.
+
+```kotlin
+package blog.`in`.action.k
+
+data class Client(val name: String, val postalCode: Int) {
+
+// not things to need
+//    override fun toString(): String {
+//        return "Client(name=$name, postalCode=$postalCode)"
+//    }
+//
+//    override fun equals(other: Any?): Boolean { // Any는 자바의 Object에 대응, Any? 는 널이 될 수 있다는 의미
+//        if (other == null || other !is Client) { // 널인지 Client 인스턴스인지 확인
+//            return false
+//        }
+//        return name == other.name && // 두 객체의 프로퍼티 값이 같은지 확인
+//                postalCode == other.postalCode
+//    }
+//
+//    override fun hashCode(): Int {
+//        return name.hashCode() * 31 + postalCode
+//    }
+}
+
+fun main() {
+
+    val client = Client("junhyunny", 12345)
+    val secondClient = Client("junhyunny", 12345)
+    println(client == secondClient)
+
+    val clientSet = hashSetOf(client)
+    println(clientSet.contains(secondClient))
+}
+```
+
+##### 데이터 클래스와 불변셩: copy() 메소드
+
+* 데이터 클래스의 프로퍼티가 반드시 val일 필요는 없다. 필요하다면 var 프로퍼티도 가능하다.
+* 하지만 데이터 클래스의 모든 프로퍼티를 읽기 전용으로 만들어서 데이터 클래스를 불변(immutable) 클래스로 만들라고 권장한다.
+* HashMap 등의 컨테이너에 데이터 클래스 객체를 담는 경우엔 불변성이 필수적이다.
+    * 데이터 클래스 객체를 키로 사용하는 경우 데이터 클래스 객체의 값을 바꾸면 컨테이너 상태가 잘못될 수 있다.
+* 다중 스레드를 사용하는 경우 불변성은 더 중요하다.
+    * 객체의 상태 변경을 막으면 스레드를 동기화할 필요를 줄일 수 있다.
+* copy 메소드는 해당 객체를 복사하면서 일부 프로퍼티를 바꿀 수 있게 돕는다.
+* 객체를 직접 바꾸는 것이 아닌 복사본을 만드는 편이 더 낫다.
+* 복사본은 원본과 다른 생명 주기를 가지며 복사를 하면서 일부 프로퍼티 값을 바꾸거나 복사본을 제거해도 프로그램에서 원본을 참조하는 다른 부분에 전혀 영향을 끼치지 않는다.
+* copy 메소드를 직접 구현하면 다음과 같다.
+
+```kotlin
+class Client(val name: String, val postalCode: Int) {
+
+    fun copy(name: String = this.name, postalCode: Int = this.postalCode) = Client(name, postalCode)
+}
+```
+
+#### 4.3.3. 클래스 위임: by 키워드 사용
 
