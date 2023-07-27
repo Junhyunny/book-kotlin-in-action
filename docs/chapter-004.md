@@ -1047,4 +1047,133 @@ fun main() {
 * 클래스 안에 정의된 객체 중 하나에 companion 이라는 특별한 표시를 붙이면 그 클래스의 동반 객체로 만들 수 있다.
     * 객체의 이름을 따로 지정할 필요가 없다.
     * 그 결과 동반 객체의 멤버를 사용하는 구문은 자바의 정적 메소드 호출이나 정적 필드 사용 구문과 같아진다.
+* private 생성자를 호출하기 좋은 위치는 동반 객체이다.
+    * 모든 private 멤버에 접근할 수 잇다.
+    * 동반 객체는 바깥쪽 클래스의 private 생성자도 호출 가능하다.
+    * 팩토리 패턴을 구현하기 가장 적합한 위치이다. 
 
+```kotlin
+package blog.`in`.action.n
+
+class A {
+    companion object {
+        fun bar() {
+            println("companion object called")
+        }
+    }
+}
+
+fun main() {
+    A.bar() // companion object called
+}
+```
+
+* 부 생성자가 2개 있는 클래스를 동반 객체를 사용해 변경할 수 있다.
+
+```kotlin
+package blog.`in`.action.n
+
+class User {
+
+    val nickName: String
+
+    constructor(email: String) {
+        this.nickName = email.substringBefore("@")
+    }
+
+    constructor(facebookAccountId: Int) {
+        nickName = getFacebookName(facebookAccountId)
+    }
+
+    private fun getFacebookName(facebookAccountId: Int): String {
+        return "facebook-user"
+    }
+}
+```
+
+* 다음과 같이 변경될 수 있습니다.
+
+```kotlin
+class User private constructor(val nickname: String) {
+    companion object {
+        fun newSubscribingUser(email: String) = User(email.substringBefore("@"))
+        fun newFacebookUser(facebookId: Int) = User(getFacebookName(facebookId))
+        private fun getFacebookName(facebookId: Int): String {
+            return "facebook-user-$facebookId"
+        }
+    }
+
+    override fun toString(): String {
+        return "(nickname = ${nickname})"
+    }
+}
+
+fun main() {
+    println(User.newSubscribingUser("junhyunny@gmail.com")) // (nickname = junhyunny)
+    println(User.newFacebookUser(1)) // (nickname = facebook-user-1)
+}
+```
+
+#### 4.4.3. 동반 객체를 일반 객체처럼 사용
+
+* 동반 객체는 클래스 안에 정의된 일반 객체이다.
+    * 동반 객체의 별도 이름을 지어줄 수 있다.
+    * 이름을 붙이지 않으면 자동으로 Companion이 된다.
+
+```kotlin
+package blog.`in`.action.o
+
+class Person(val name: String) {
+    companion object Loader {
+        fun fromJSON(jsonText: String): Person = Person("junhyunny")
+    }
+}
+
+fun main() {
+    Person.Loader.fromJSON(("{name: 'junhyunny'}"))
+    Person.fromJSON(("{name: 'junhyunny'}"))
+}
+```
+
+##### 동분 객체에서 인터페이스 구현
+
+* 동반 객체도 인터페이스를 구현할 수 있다.
+* 인터페이스를 구현하는 동반 객체를 참조할 때 객체를 둘러싼 클래스의 이름을 바로 사용할 수 있다.
+
+```kotlin
+interface JSONFactory<T> {
+    fun fromJSON(jsonText: String): T
+}
+
+class Person(val name: String) {
+    companion object: JSONFactory<Person> {
+        override fun fromJSON(jsonText: String): Person {
+            TODO("Not yet implemented")
+        }
+    }
+}
+
+fun main() {
+    Person.fromJSON(("{name: 'junhyunny'}"))
+}
+```
+
+* 코틀린 동반 객체와 정적 멤버
+    * 클래스의 동반 객체는 일반 객체와 비슷한 방식으로, 클래스에 정의된 인스턴스를 가리키는 정적 필드로 컴파일된다.
+    * 동반 객체에 이름이 붙지 않았다면 자바 쪽에서 Companion이라는 이름으로 그 참조에 접근할 수 있다.
+    * 자바 상호 운용성을 위해 @JvmStatic, @JvmField 애너테이션을 사용한다.
+
+##### 동반 객체 확장
+
+* 확장 함수를 사용하면 코드 기반의 다른 곳에서 정의된 클래스의 인스턴스에 대한 새로운 메소드를 정의할 수 있다.
+* 동반 객체도 확장 함수를 정의할 수 있다.
+
+```kotlin
+class Person(val firstName: String, val lastName: String) {
+    companion object
+}
+
+fun Person.Companion.fromJSON(json: String): Person {
+    TODO("Not yet implemented")
+}
+```
