@@ -1177,3 +1177,30 @@ fun Person.Companion.fromJSON(json: String): Person {
     TODO("Not yet implemented")
 }
 ```
+
+#### 4.4.4. 객체 식: 무명 내부 클래스를 다른 방식으로 작성
+
+* object 키워드는 무명 객체(anonymous object)를 정의할 때도 사용한다.
+* 무명 객체는 자바의 무명 내부 클래스를 대신한다.
+
+* 다음과 같이 이벤트 리스너를 생성할 수 있다.
+* 객체 식은 클래스를 정의하고 클래스에 속한 인스턴스를 생성하지만, 클래스나 인스턴스에 이름을 붙이진 않는다.
+* 이름이 필요하다면 아래처럼 변수에 무명 객체를 대입할 수 있다.
+    * 객체 선언과 달리 무명 객체는 싱글턴이 아니다. 
+    * 객체 식이 쓰일 때마다 새로운 인스턴스가 생성된다.
+
+```kotlin
+package blog.`in`.action.p
+
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
+
+val listeners = object : MouseAdapter() {
+    override fun mouseClicked(e: MouseEvent?) {
+        super.mouseClicked(e)
+    }
+    override fun mouseEntered(e: MouseEvent?) {
+        super.mouseEntered(e)
+    }
+}
+```
