@@ -872,3 +872,179 @@ class Client(val name: String, val postalCode: Int) {
 
 #### 4.3.3. 클래스 위임: by 키워드 사용
 
+* 대규모 객체지향 시스템을 설계할 때  시스템을 취약하게 만드는 문제는 구현 상속에 의해 발생한다.
+* 하위 클래스가 상위 클래스의 메소드 중 일부를 오버라이드하면 하위 클래스는 상위 클래스의 세부 구현 사항에 의존하게 된다.
+* 시스템이 변하면서 상위 클래스의 구현이 바뀌거나 상위 클래스에 새로운 메소드가 추가된다.
+    * 이 과정에서 하위 클래스가 상위 클래스에 갖고 있던 가정이 깨지면서 코드가 정상적으로 작동하지 못하는 경우가 생긴다.
+* 코틀린은 기본적으로 final로 클래스를 만든다.
+* 모든 클래스를 기본적으로 final 취급하면 상속에 염두를 두고 open 변경자로 열어둔 클래스만 확장할 수 있다.
+    * open 키워드를 보면 하위 클래스가 있을 것을 예상할 수 있으므로 하위 클래스가 깨지지 않게 조심할 수 있다.
+* 종종 상속을 허용하지 않는 클래스에 새로운 동작을 추가해야할 때가 있다.
+    * 데코레이터(decorator) 패턴을 사용한다.
+    * 단점은 준비 코드가 상당히 많이 필요하다는 것이다.
+
+* 다음과 같은 데코레이터 패턴이 적용된 클래스를 by 키워드를 사용해 단순화할 수 있다.
+
+```kotlin
+package blog.`in`.action.l
+
+class DelegationCollection<T>(
+    private val innerList: Collection<T> = arrayListOf()
+) : Collection<T> {
+    override val size: Int = innerList.size
+    override fun isEmpty(): Boolean = innerList.isEmpty()
+    override fun iterator(): Iterator<T> = innerList.iterator()
+    override fun containsAll(elements: Collection<T>): Boolean = innerList.containsAll(elements)
+    override fun contains(element: T): Boolean = innerList.contains(element)
+}
+```
+
+* 클래스 안에 있던 모든 메소드 정의가 없어진다.
+* 컴파일러가 전달 메소드를 자동으로 생성하며 자동 생성한 코드의 구현은 위의 코드와 비슷하다.
+
+```kotlin
+class DelegationCollection<T>(
+    private val innerList: Collection<T> = arrayListOf()
+) : Collection<T> by innerList 
+```
+
+* 메소드 중 일부의 동작을 변경하고 싶은 경우 메소드를 오버라이드하면 컴파일러가 생성한 메소드 대신 오버라이드한 메소드가 사용된다.
+* 기존 클래스의 메소드에 위임하는 기본 구현으로 충분한 메소드는 따로 오버라이드할 필요가 없다.
+
+* CountingSet 클래스에 MutableCollection 구현 방식에 대한 의존 관계가 생기지 않는다.
+* CountingSet 클래스는 기본적으로 MutableCollection 객체의 구현을 그대로 따라간다.
+
+```kotlin
+package blog.`in`.action.l
+
+class CountingSet<T>(
+    val innerSet: MutableCollection<T> = HashSet()
+) : MutableCollection<T> by innerSet {
+
+    var objectsAdded = 0
+
+    override fun add(element: T): Boolean {
+        objectsAdded++
+        return innerSet.add(element)
+    }
+
+    override fun addAll(elements: Collection<T>): Boolean {
+        objectsAdded += elements.size
+        return innerSet.addAll(elements)
+    }
+}
+
+fun main() {
+
+    val countingSet = CountingSet<Int>()
+    countingSet.addAll(listOf(1, 1, 2))
+    println("${countingSet.objectsAdded} objects were added, ${countingSet.size} remain")
+}
+```
+
+### 4.4. object 키워드: 클래스 선언과 인스턴스 생성
+
+* 코틀린에서는 object 키워드를 다양한 상황에서 사용하며 동시에 인스턴스를 생성한다.
+* 객체 선언(object declaration)은 싱글턴을 정의하는 방법 중 하나이다.
+* 동반 객체(companion object)는 인스턴스 메소드가 아니지만 어떤 클래스와 관련 있는 메소드와 팩토리 메소드를 담을 때 사용된다.
+* 동반 객체 메소드에 접근할 때는 동반 객체가 포함된 클래스의 이름을 사용할 수 있다.
+* 객체 식은 자바의 무명 내부 클래스(anonymous inner class) 대신 사용된다.
+
+#### 4.4.1. 객체 선언: 싱글턴을 쉽게 만들기
+
+* 보통 클래스의 생성자를 private으로 제한하고 정적인 필드에 그 클래스의 유일한 객체를 저장하는 싱글톤 패턴을 구현한다.
+* 코틀린은 객체 선언 기능을 통해 싱글톤을 언어에서 기본적으로 제공한다.
+* 객체 선언은 클래스 선언과 그 클래스에 속한 단일 인스턴스의 선언을 합친 선언이다.
+
+* 객체 선언은 object 키워드로 시작한다.
+* 객체 선언은 클래스를 정의하고 그 클래스의 인스턴스를 만들어서 저장하는 모든 작업을 한 문장으로 처리한다.
+* 클래스와 마찬가지로 객체 선언 안에 프로퍼티, 메소드, 초기화 블록 등이 들어갈 수 있다.
+* 하지만 생성자(주 생성자, 부 생성자 모두) 객체 선언에 쓸 수 없다.
+
+```kotlin
+package blog.`in`.action.m
+
+class Person
+
+object Payroll {
+
+    val allEmployees = arrayListOf<Person>()
+
+    fun calculateSalary() {
+        for (person in allEmployees) {
+            // ...
+        }
+    }
+}
+
+fun main() {
+
+    Payroll.allEmployees.add(Person())
+    Payroll.calculateSalary()
+}
+```
+
+* 객체 선언도 클래스나 인터페이스를 상속할 수 있다.
+* 프레임워크를 사용하려면 특정 인터페이스를 구현해야 하는데, 그 구현 내부에 다른 상태가 필요하지 않은 경우 이런 기능이 유용하다.
+* 일반 객체(클래스 인스턴스)를 사용할 수 있는 곳에서는 항상 싱글턴 객체를 사용할 수 있다.
+
+```kotlin
+package blog.`in`.action.m
+
+import java.io.File
+
+object CaseInsensitiveFileComparator : Comparator<File> {
+
+    override fun compare(f1: File, f2: File): Int {
+        return f1.path.compareTo(f2.path, ignoreCase = true)
+    }
+}
+
+fun main() {
+
+    println(CaseInsensitiveFileComparator.compare(File("/User"), File("/user"))) // 0
+
+    val files = listOf(File("/z"), File("/a"))
+    println(files.sortedWith(CaseInsensitiveFileComparator)) // [/a, /z]
+}
+```
+
+* 싱글톤과 의존관계 주입
+    * 싱글톤 패턴과 마찬가지 이유로 대규모 소프트웨어 시스템에서는 객체 선언이 항상 적합하지는 않다.
+    * 의존관계가 별로 많지 않은 소규모 소프트웨어에서는 싱글톤이나 객체 선언이 유용하지만, 시스템을 구현하는 다양한 구성 요소와 상호작용하는 대규모 컴포넌트에는 싱글톤이 적합하지 않다.
+        * 객체 생성을 제어할 방법이 없고 생성자 파라미터를 지정할 수 없기 때문이다.
+    * 생성을 제어할 수 없고 생성자 파라미터를 지정할 수 없으므로 단위 테스트를 하거나 소프트웨어 시스템의 설정이 달라질 때 객체를 대체하거나 객체의 의존 관계를 바꿀 수 없다.
+
+* 클래스 안에서 객체를 선언할 수 있다.
+* 그런 객체도 인스턴스는 하나뿐이다.
+    * 바깥 클래스의 인스턴스마다 중첩 객체에 해당하는 인스턴스가 하나씩 따로 생기는 것이 아니다.
+
+```kotlin
+data class Human(val name: String) {
+    object NameComparator : Comparator<Human> {
+        override fun compare(o1: Human, o2: Human): Int {
+            return o1.name.compareTo(o2.name)
+        }
+    }
+}
+
+fun main() {
+
+    val humans = listOf(Human("Bob"), Human("Alice"))
+    println(humans.sortedWith(Human.NameComparator)) [Human(name=Alice), Human(name=Bob)]
+    println(Human.NameComparator) blog.in.action.m.Human$NameComparator@7530d0a
+}
+```
+
+#### 4.4.2. 동반 객체: 팩토리 메소드와 정적 멤버가 들어가는 장소
+
+* 코틀린 클래스 안에는 정적인 멤버가 없다.
+* 코틀린 언어는 자바 static 키워드를 지원하지 않는다.
+* 그 대신 코틀린에서 패키지 수준의 최상위 함수와 객체 선언을 활용한다.
+    * 자바의 정적 메소드 역할을 거의 대신 할 수 있다.
+    * 자바의 정적 메소드 역할 중 코틀린 최상위 함수가 대신할 수 없는 역할이나 정적 필드를 대신할 수 있다.
+    * 대부분의 경우 최상위 함수를 활용하는 편이 더 좋다.
+* 클래스 안에 정의된 객체 중 하나에 companion 이라는 특별한 표시를 붙이면 그 클래스의 동반 객체로 만들 수 있다.
+    * 객체의 이름을 따로 지정할 필요가 없다.
+    * 그 결과 동반 객체의 멤버를 사용하는 구문은 자바의 정적 메소드 호출이나 정적 필드 사용 구문과 같아진다.
+
