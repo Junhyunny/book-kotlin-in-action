@@ -13,3 +13,4 @@
 * [03. 함수 정의와 호출](/docs/chapter-003.md)
 * [04. 클래스, 객체, 인터페이스](/docs/chapter-004.md)
 * [05. 람다로 프로그래밍](/docs/chapter-005.md)
+* [06. 코틀린 타입 시스템](/docs/chapter-006.md)
