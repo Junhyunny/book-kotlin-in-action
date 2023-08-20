@@ -75,3 +75,84 @@ fun main() {
 
 #### 6.1.2. 타입의 의미
 
+#### 6.1.3. 안전한 호출 연산자: ?.
+
+* 코틀린은 안전한 호출 연산자인 ?. 를 제공한다.
+* ?. 연산자를 통해 null 검사와 메소드 호출을 한 번의 연산으로 수행한다.
+
+```kotlin
+// 아래 두 코드는 동일하다.
+s?.toUpperCase()
+if (s != null) s.toUpperCase() else null 
+```
+
+* s?.toUpperCase() 식의 결과도 null 값이 될 수 있다는 점에서 String?이 된다.
+
+```kotlin
+package action.`in`.blog.b
+
+class Employee(
+    val name: String,
+    val manager: Employee?
+)
+
+fun managerName(employee: Employee): String? = employee.manager?.name
+
+fun main() {
+
+    val ceo = Employee("Da Boss", null)
+    val developer = Employee("Bob Smith", ceo)
+    
+    println(managerName(ceo))
+    println(managerName(developer))
+}
+```
+
+* 안전한 호출은 연쇄적으로 사용할 수 있다.
+
+```kotlin
+
+class Address(
+    val streetAddress: String,
+    val zipCode: Int,
+    val city: String,
+    val country: String
+)
+
+class Company(
+    val name: String,
+    val address: Address?
+)
+
+class Person(
+    val name: String,
+    val company: Company?
+)
+
+fun Person.countryName(): String {
+    val country = this.company?.address?.country
+    return if (country != null) country else "Unknown"
+}
+
+fun main() {
+
+    val person = Person("Dmitry", null)
+    println(person.countryName()) // Unknown
+}
+```
+
+#### 6.1.4. 엘비스 연산자: ?:
+
+* 코틀린은 null 대신 사용할 디폴트 값을 지정할 때 편리하게 사용할 수 있는 연산자를 제공한다.
+* 그 연산자를 엘비스(elvis) 연산자라고 한다. (혹은 null coalescing)
+
+```kotlin
+package action.`in`.blog.c
+
+fun foo(s: String?) {
+    val value: String = s ?: "defualt value"
+}
+```
+
+* 코틀린에서는 return 이나 throw 등의 연산도 식이다.
+* 엘비스 연산자의 우항에 return, throw 등의 연산을 넣을 수 있고, 엘비스 연산자를 더욱 편하게 사용할 수 있다.
